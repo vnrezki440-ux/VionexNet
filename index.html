@@ -31,9 +31,9 @@
     <!-- 1. ВХОД В СИСТЕМУ -->
     <div id="screen-login">
         <h1>VionexNet</h1>
-        <p style="text-align:center; color:#aaa; margin-bottom:20px;">Введите ваш личный ID для входа</p>
-        <input type="password" id="input-id" placeholder="Введите ваш ID">
-        <button class="btn" onclick="login()">Войти</button>
+        <p style="text-align:center; color:#aaa; margin-bottom:20px;">Введите ваш ID для входа</p>
+        <input type="text" id="input-id" placeholder="Введите ID">
+        <button class="btn" onclick="login()">Продолжить</button>
     </div>
 
     <!-- 2. КАБИНЕТ АДМИНИСТРАТОРА -->
@@ -53,26 +53,28 @@
             <div class="flex-between">
                 <div>
                     <strong>Текущий VPN ключ:</strong>
-                    <p id="adm-vpn-link" style="font-size:12px; color:#60a5fa;">vless://default-key-link</p>
+                    <p id="adm-vpn-link" style="font-size:12px; color:#60a5fa; word-break:break-all;"></p>
                 </div>
                 <button class="btn btn-small" onclick="toggleBlock('edit-vpn-block')">|Изменить|</button>
             </div>
             <div id="edit-vpn-block" class="hidden" style="margin-top:10px;">
                 <input type="text" id="new-vpn-input" placeholder="Вставьте новую ссылку VPN">
-                <button class="btn btn-small btn-success" onclick="saveVpn()">Сохранить VPN</button>
+                <button class="btn btn-small btn-success" onclick="saveVpn()">Сохранить</button>
             </div>
         </div>
 
-        <h3>Список пользователей:</h3>
+        <h3>Мои Друзья (Пользователи):</h3>
         <div id="admin-friends-list"></div>
 
         <button class="btn" onclick="generateId()">|Создать новый ID|</button>
 
-        <h3 style="margin-top:15px;">Заявки на доступ:</h3>
+        <h3 style="margin-top:15px;">Заявки в друзья:</h3>
         <div id="admin-requests-list"></div>
+        
+        <button class="btn btn-danger" style="margin-top:15px; font-size:12px;" onclick="logout()">Выйти из системы</button>
     </div>
 
-    <!-- 3. КАБИНЕТ КЛИЕНТА -->
+    <!-- 3. КАБИНЕТ КЛИЕНТА (ДРУГА) -->
     <div id="screen-client" class="hidden">
         <div class="flex-between">
             <h2>VionexNet Client</h2>
@@ -84,63 +86,71 @@
         </div>
         <hr style="border-color:#333; margin:15px 0;">
 
-        <button class="btn btn-success" onclick="toggleBlock('client-vpn-card')">|Получить VPN Ключ|</button>
+        <button class="btn btn-success" onclick="toggleBlock('client-vpn-card')">|Подключить VPN|</button>
 
-        <!-- Карточка VPN для клиента -->
+        <!-- Карточка VPN -->
         <div id="client-vpn-card" class="card hidden" style="margin-top:10px;">
             <h3>Ваш VPN ключ</h3>
             <p style="margin-top:5px;"><strong>Ссылка:</strong></p>
-            <p id="client-key-text" style="color:#60a5fa; font-size:12px; word-break:break-all; margin-bottom:10px;">vless://default-key-link</p>
+            <p id="client-key-text" style="color:#60a5fa; font-size:12px; word-break:break-all; margin-bottom:10px;"></p>
             <button class="btn btn-small" onclick="copyKey()">|Копировать Ссылку|</button>
         </div>
 
-        <h3 style="margin-top:15px;">Связь с Администратором:</h3>
+        <h3 style="margin-top:15px;">Чат с Администратором:</h3>
         <div class="card flex-between">
             <div>
                 <strong>Администратор</strong>
-                <p style="font-size:12px; color:#aaa;">Онлайн</p>
+                <p style="font-size:12px; color:#aaa;">ID: 1234000</p>
             </div>
-            <button class="btn btn-small" onclick="openChat()">|Написать Сообщение|</button>
+            <button class="btn btn-small" onclick="openChat()">|Написать|</button>
         </div>
+
+        <button class="btn btn-danger" style="margin-top:15px; font-size:12px;" onclick="logout()">Выйти</button>
     </div>
 
     <!-- 4. ЭКРАН ОЖИДАНИЯ -->
     <div id="screen-wait" class="hidden" style="text-align:center;">
         <h2>VionexNet</h2>
-        <p style="margin:20px 0; color:#aaa;">Ваш ID отправлен. Подождите, пока администратор подтвердит доступ.</p>
-        <p style="color:#16a34a; font-weight:bold;">Запрос отправлен ✓</p>
+        <p style="margin:20px 0; color:#aaa;">Подождите пока администратор возьмёт вас в друзья...</p>
+        <p style="color:#16a34a; font-weight:bold; margin-bottom:15px;">Отправлено ✓</p>
+        <button class="btn btn-danger" style="font-size:12px;" onclick="logout()">Назад к входу</button>
     </div>
 
     <!-- 5. МОДУЛЬ ЧАТА -->
     <div id="screen-chat" class="hidden">
         <div class="flex-between" style="margin-bottom:10px;">
-            <h3>Чат поддержки</h3>
+            <h3>Чат</h3>
             <button class="btn btn-small btn-danger" onclick="closeChat()">Закрыть</button>
         </div>
-        <div class="chat-box" id="chat-messages">
-            <div class="chat-msg">Здравствуйте! Чем могу помочь?</div>
-        </div>
-        <input type="text" id="chat-input" placeholder="Введите текстовое сообщение...">
+        <div class="chat-box" id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Введите сообщение...">
         <button class="btn" onclick="sendMessage()">Отправить</button>
     </div>
 
 </div>
 
 <script>
-    // Секретный ID админа теперь настраивается здесь или вводится при входе
-    // Вы можете изменить "admin123" на любой удобный вам код
-    const ADMIN_SECRET_CODE = "admin123"; 
-    
-    let currentVpn = "vless://vionexnet-free-config-link";
-    let currentUserRole = "";
+    const ADMIN_ID = "1234000"; // Ваш личный ID Администратора
 
-    let usersList = [
-        { name: "Пользователь 1", id: "777111" }
-    ];
+    // Загрузка сохраненных данных или установка стандартных
+    let currentVpn = localStorage.getItem('vionex_vpn') || "vless://default-vpn-key-link";
+    let friends = JSON.parse(localStorage.getItem('vionex_friends')) || [];
+    let requests = JSON.parse(localStorage.getItem('vionex_requests')) || [];
+    let activeUser = localStorage.getItem('vionex_active_user') || null;
 
-    let pendingRequests = [
-        { name: "Новый пользователь", id: "888222" }
-    ];
+    // Авто-вход при открытии страницы, если пользователь уже входил ранее
+    window.onload = function() {
+        if (activeUser) {
+            document.getElementById('input-id').value = activeUser;
+            login();
+        }
+    };
+
+    function saveData() {
+        localStorage.setItem('vionex_vpn', currentVpn);
+        localStorage.setItem('vionex_friends', JSON.stringify(friends));
+        localStorage.setItem('vionex_requests', JSON.stringify(requests));
+    }
 
     function showScreen(id) {
         document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
@@ -158,45 +168,59 @@
             return;
         }
 
-        // Проверка на Администратора
-        if (inputId === ADMIN_SECRET_CODE) {
-            currentUserRole = "admin";
+        localStorage.setItem('vionex_active_user', inputId);
+
+        // 1. Проверка на вас (Администратора)
+        if (inputId === ADMIN_ID) {
             renderAdmin();
             showScreen('screen-admin');
         } 
-        // Проверка на существующего пользователя
-        else if (usersList.some(u => u.id === inputId)) {
-            currentUserRole = "client";
+        // 2. Проверка: уже ли друг в принятом списке пользователей
+        else if (friends.some(f => f.id === inputId)) {
             document.getElementById('client-key-text').innerText = currentVpn;
             showScreen('screen-client');
         } 
-        // Новый неизвестный ID
+        // 3. Новый случай: если пользователя еще нет в друзьях
         else {
-            pendingRequests.push({ name: "ID: " + inputId, id: inputId });
+            // Проверяем, отправлял ли он уже заявку ранее
+            if (!requests.some(r => r.id === inputId)) {
+                requests.push({ name: "Пользователь", id: inputId });
+                saveData();
+            }
             showScreen('screen-wait');
         }
+    }
+
+    function logout() {
+        localStorage.removeItem('vionex_active_user');
+        document.getElementById('input-id').value = "";
+        showScreen('screen-login');
     }
 
     function renderAdmin() {
         document.getElementById('adm-vpn-link').innerText = currentVpn;
         
-        // Список пользователей
-        const uContainer = document.getElementById('admin-friends-list');
-        uContainer.innerHTML = usersList.map(u => `
-            <div class="card flex-between">
-                <div><strong>${u.name}</strong> <span style="font-size:12px; color:#aaa;">(ID: ${u.id})</span></div>
-                <button class="btn btn-small" onclick="openChat()">Чат</button>
-            </div>
-        `).join('');
+        // Список друзей
+        const fList = document.getElementById('admin-friends-list');
+        if (friends.length === 0) {
+            fList.innerHTML = "<p style='color:#777; font-size:13px;'>Список друзей пуст</p>";
+        } else {
+            fList.innerHTML = friends.map(f => `
+                <div class="card flex-between">
+                    <div><strong>${f.name}</strong> <span style="font-size:12px; color:#aaa;">(ID: ${f.id})</span></div>
+                    <button class="btn btn-small" onclick="openChat()">Чат</button>
+                </div>
+            `).join('');
+        }
 
         // Список заявок
-        const rContainer = document.getElementById('admin-requests-list');
-        if (pendingRequests.length === 0) {
-            rContainer.innerHTML = "<p style='color:#777; font-size:13px;'>Новых заявок нет</p>";
+        const rList = document.getElementById('admin-requests-list');
+        if (requests.length === 0) {
+            rList.innerHTML = "<p style='color:#777; font-size:13px;'>Новых заявок нет</p>";
         } else {
-            rContainer.innerHTML = pendingRequests.map((r, index) => `
+            rList.innerHTML = requests.map((r, index) => `
                 <div class="card flex-between">
-                    <div><strong>${r.name}</strong></div>
+                    <div><strong>ID: ${r.id}</strong></div>
                     <div>
                         <button class="btn btn-small btn-success" onclick="acceptReq(${index})">Принять</button>
                         <button class="btn btn-small btn-danger" onclick="declineReq(${index})">Отклонить</button>
@@ -206,50 +230,51 @@
         }
     }
 
-    // Сохранение нового VPN ключа
     function saveVpn() {
         const val = document.getElementById('new-vpn-input').value.trim();
         if (val) {
             currentVpn = val;
+            saveData();
             document.getElementById('adm-vpn-link').innerText = currentVpn;
             document.getElementById('client-key-text').innerText = currentVpn;
             document.getElementById('new-vpn-input').value = "";
             toggleBlock('edit-vpn-block');
             alert("VPN ссылка успешно обновлена!");
-        } else {
-            alert("Введите корректную ссылку!");
         }
     }
 
     function generateId() {
         const newId = Math.floor(100000 + Math.random() * 900000);
         navigator.clipboard.writeText(newId);
-        alert("Сгенерирован новый ID: " + newId + "\nОн скопирован в буфер обмена!");
+        alert("Сгенерирован новый ID: " + newId + "\nСкопировано в буфер обмена!");
     }
 
     function acceptReq(i) {
-        usersList.push(pendingRequests[i]);
-        pendingRequests.splice(i, 1);
+        friends.push(requests[i]);
+        requests.splice(i, 1);
+        saveData();
         renderAdmin();
     }
 
     function declineReq(i) {
-        pendingRequests.splice(i, 1);
+        requests.splice(i, 1);
+        saveData();
         renderAdmin();
     }
 
     function copyKey() {
         navigator.clipboard.writeText(currentVpn);
-        alert("Ссылка скопирована в буфер обмена!");
+        alert("Скопировано!");
     }
 
-    // Логика чата
+    // Чат
     function openChat() {
         showScreen('screen-chat');
     }
 
     function closeChat() {
-        if (currentUserRole === 'admin') {
+        const active = localStorage.getItem('vionex_active_user');
+        if (active === ADMIN_ID) {
             showScreen('screen-admin');
         } else {
             showScreen('screen-client');
@@ -267,7 +292,6 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    // Переключение языков
     function setLang(lang) {
         if (lang === 'tk') {
             document.getElementById('adm-title').innerText = "VionexNet Admistrator Paneli";
@@ -279,4 +303,4 @@
     }
 </script>
 </body>
-                    </html>
+</html>
