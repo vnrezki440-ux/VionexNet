@@ -1,231 +1,86 @@
-// ==========================================
-// 1. ДАННЫЕ И СОСТОЯНИЕ ПРИЛОЖЕНИЯ (STATE)
-// ==========================================
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VionexNet</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; padding: 20px; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 12px; margin: 15px 0; border: 1px solid #333; }
+        input { padding: 10px; border-radius: 6px; border: none; width: 80%; max-width: 250px; margin-bottom: 10px; }
+        button { background: #007bff; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
 
-const ADMIN_ID = "1234000";
+    <!-- ЭКРАН 1: Приветствие и Вход -->
+    <div id="screen-login" class="card">
+        <h1>VionexNet</h1>
+        <p>Добро пожаловать!</p>
+        <input type="text" id="user-id-input" placeholder="Введите ваш ID (например, 1234000)">
+        <br>
+        <button onclick="handleLogin()">Войти</button>
+    </div>
 
-let currentState = {
-currentLanguage: 'ru', // 'ru', 'tk', 'en'
-currentUser: null,     // Данные вошедшего пользователя
+    <!-- ЭКРАН 2: Кабинет Админа -->
+    <div id="screen-admin" class="card hidden">
+        <h2 id="admin-welcome">Welcome to VionexNet Sir!</h2>
+        <div>
+            <button onclick="setLang('ru')">RU</button>
+            <button onclick="setLang('tk')">TK</button>
+            <button onclick="setLang('en')">EN</button>
+        </div>
+        <hr>
+        <h3>Мои Друзья:</h3>
+        <p>Alyhan | ID: 555111 | ВПН-Код: https://vpn-kod.com/sub/alyhan</p>
+        <p>Rahat  | ID: 555222 | ВПН-Код: https://vpn-kod.com/sub/rahat</p>
+        <button onclick="alert('Новый ID: ' + Math.floor(100000 + Math.random() * 900000))">|Создать ID|</button>
+    </div>
 
-// Список друзей для Админа  
-adminFriends: [  
-    { name: "Alyhan", id: "555111", vpn: "https://vpn.kod.com/sub/alyhan" },  
-    { name: "Rahat",  id: "555222", vpn: "https://vpn.kod.com/sub/rahat" },  
-    { name: "Resul",  id: "555333", vpn: "https://vpn.kod.com/sub/resul" },  
-    { name: "Rowac",  id: "555444", vpn: "https://vpn.kod.com/sub/rowac" },  
-    { name: "Rahym",  id: "555555", vpn: "https://vpn.kod.com/sub/rahym" }  
-],  
+    <!-- ЭКРАН 3: Кабинет Клиента -->
+    <div id="screen-client" class="card hidden">
+        <h2>Welcome to VionexNet Sir!</h2>
+        <button onclick="openVpn()">|Подключить|</button>
+        
+        <div id="vpn-info" class="card hidden" style="background:#2a2a2a;">
+            <h3>Ваш VPN код</h3>
+            <p>Название VPN: happ, v2box</p>
+            <p>Трафик Лимит: 3 GB</p>
+            <p>Осталось: 5 Часов</p>
+            <p>Ваш Ключ: <b>https://vpn-kod.com/sub/demo</b></p>
+            <button onclick="navigator.clipboard.writeText('https://vpn-kod.com/sub/demo'); alert('Скопировано!');">Копировать Ссылку</button>
+        </div>
+    </div>
 
-// Входящие приглашения  
-pendingRequests: [  
-    { name: "Kakajan", id: "999888" }  
-],  
+    <!-- JS СКРИПТ (МОЗГИ) -->
+    <script>
+        const ADMIN_ID = "1234000";
 
-// История чата (только текстовые сообщения)  
-chatMessages: []
+        function handleLogin() {
+            const id = document.getElementById('user-id-input').value.trim();
+            if(!id) return alert("Введите ID!");
 
-};
+            document.getElementById('screen-login').classList.add('hidden');
 
-// ==========================================
-// 2. СЛОВАРЬ ПЕРЕВОДОВ (МУЛЬТИЯЗЫЧНОСТЬ)
-// ==========================================
+            if(id === ADMIN_ID) {
+                document.getElementById('screen-admin').classList.remove('hidden');
+            } else {
+                document.getElementById('screen-client').classList.remove('hidden');
+            }
+        }
 
-const translations = {
-ru: {
-welcome: "Welcome to VionexNet Sir!",
-connect: "Подключить",
-vpnTitle: "Ваш VPN код",
-vpnApps: "Название VPN: happ, v2box",
-vpnLimit: "Трафик Лимит: 3 GB",
-vpnTime: "Осталось: 5 Часов",
-vpnKey: "Ваш Ключ:",
-copy: "Копировать Ссылку",
-copied: "Скопировано!",
-accept: "Принять",
-decline: "Отклонить",
-waitText: "Подождите пока администратор возьмёт вас в друзья...",
-sent: "Отправлено ✓",
-resend: "Отправить ещё раз",
-chatOnlyText: "Можно отправлять только текстовые сообщения!"
-},
-tk: {
-welcome: "VionexNet-e Hoş geldiňiz Sir!",
-connect: "Birikdirmek",
-vpnTitle: "Siziň VPN koduňyz",
-vpnApps: "VPN ady: happ, v2box",
-vpnLimit: "Trafik çägi: 3 GB",
-vpnTime: "Galdy: 5 Sagat",
-vpnKey: "Siziň Açaryňyz:",
-copy: "Ssylkany göçürmek",
-copied: "Göçürildi!",
-accept: "Kabul etmek",
-decline: "Yza gaýtarmak",
-waitText: "Administrator sizi dostlyga kabul edýänçä garaşyň...",
-sent: "Ugratyldy ✓",
-resend: "Täzeden ugratmak",
-chatOnlyText: "Diňe tekst habarlaryny ugratmak bolýar!"
-},
-en: {
-welcome: "Welcome to VionexNet Sir!",
-connect: "Connect",
-vpnTitle: "Your VPN Code",
-vpnApps: "VPN Name: happ, v2box",
-vpnLimit: "Traffic Limit: 3 GB",
-vpnTime: "Time left: 5 Hours",
-vpnKey: "Your Key:",
-copy: "Copy Link",
-copied: "Copied!",
-accept: "Accept",
-decline: "Decline",
-waitText: "Please wait until administrator accepts your request...",
-sent: "Sent ✓",
-resend: "Send again",
-chatOnlyText: "Only text messages are allowed!"
-}
-};
+        function openVpn() {
+            document.getElementById('vpn-info').classList.remove('hidden');
+        }
 
-// ==========================================
-// 3. ЛОГИКА ВХОДА И АВТОРИЗАЦИИ
-// ==========================================
-
-function handleLogin(inputId) {
-const cleanId = inputId.trim();
-
-if (!cleanId) {  
-    alert("Пожалуйста, введите ID!");  
-    return;  
-}  
-
-if (cleanId === ADMIN_ID) {  
-    currentState.currentUser = { role: 'admin', id: ADMIN_ID };  
-    showScreen('admin-dashboard');  
-} else {  
-    // Логика для обычного клиента  
-    currentState.currentUser = { role: 'client', id: cleanId };  
-      
-    // Пример проверки: если ID новый — на экран ожидания  
-    const isApproved = checkUserApproval(cleanId);  
-    if (isApproved) {  
-        showScreen('client-dashboard');  
-    } else {  
-        showScreen('wait-screen');  
-    }  
-}
-
-}
-
-function checkUserApproval(userId) {
-// Проверка, есть ли пользователь в одобренном списке
-return currentState.adminFriends.some(friend => friend.id === userId);
-}
-
-// ==========================================
-// 4. СИСТЕМА ПРИГЛАШЕНИЙ (ID)
-// ==========================================
-
-// Генерация уникального ID для нового друга
-function generateNewFriendID() {
-const newId = Math.floor(100000 + Math.random() * 900000).toString();
-navigator.clipboard.writeText(newId);
-alert(Создан новый ID: ${newId}\nКод скопирован в буфер обмена! Отправьте его другу.);
-return newId;
-}
-
-// Принять заявку в друзья
-function acceptFriendRequest(requestId) {
-const index = currentState.pendingRequests.findIndex(req => req.id === requestId);
-if (index !== -1) {
-const user = currentState.pendingRequests[index];
-currentState.adminFriends.push({
-name: user.name,
-id: user.id,
-vpn: https://vpn-kod.com/sub/${user.name.toLowerCase()}
-});
-currentState.pendingRequests.splice(index, 1);
-renderAdminDashboard(); // Обновляем список на экране
-}
-}
-
-// Отклонить заявку в друзья
-function declineFriendRequest(requestId) {
-currentState.pendingRequests = currentState.pendingRequests.filter(req => req.id !== requestId);
-renderAdminDashboard();
-}
-
-// ==========================================
-// 5. ПОДКЛЮЧЕНИЕ VPN И МОДАЛЬНОЕ ОКНО
-// ==========================================
-
-function openVpnDetails() {
-const modal = document.getElementById('vpn-modal');
-if (modal) modal.style.display = 'block';
-}
-
-function copyVpnKey(keyUrl) {
-navigator.clipboard.writeText(keyUrl).then(() => {
-const lang = currentState.currentLanguage;
-alert(translations[lang].copied);
-});
-}
-
-// ==========================================
-// 6. ТЕКСТОВЫЙ ЧАТ (БЕЗ МЕДИА)
-// ==========================================
-
-function sendChatMessage(textInput, fileInput) {
-// Строгая проверка: заблокировать, если передан файл
-if (fileInput && fileInput.files && fileInput.files.length > 0) {
-const lang = currentState.currentLanguage;
-alert(translations[lang].chatOnlyText);
-fileInput.value = ''; // Очищаем файл
-return;
-}
-
-const message = textInput.value.trim();  
-if (!message) return;  
-
-currentState.chatMessages.push({  
-    sender: currentState.currentUser.id,  
-    text: message,  
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })  
-});  
-
-textInput.value = '';  
-renderChat();
-
-}
-
-// ==========================================
-// 7. СМЕНА ЯЗЫКА
-// ==========================================
-
-function setLanguage(langCode) {
-if (translations[langCode]) {
-currentState.currentLanguage = langCode;
-updateUIAllTexts();
-}
-}
-
-function updateUIAllTexts() {
-const lang = currentState.currentLanguage;
-const dict = translations[lang];
-
-// Обновляем все элементы с атрибутом data-lang  
-document.querySelectorAll('[data-lang]').forEach(element => {  
-    const key = element.getAttribute('data-lang');  
-    if (dict[key]) {  
-        element.innerText = dict[key];  
-    }  
-});
-
-}
-
-// Вспомогательная функция для переключения экранов
-function showScreen(screenId) {
-document.querySelectorAll('.screen').forEach(screen => {
-screen.style.display = 'none';
-});
-const target = document.getElementById(screenId);
-if (target) target.style.display = 'block';
-}
+        function setLang(lang) {
+            const title = document.getElementById('admin-welcome');
+            if(lang === 'tk') title.innerText = "VionexNet-e Hoş geldiňiz Sir!";
+            else if(lang === 'en') title.innerText = "Welcome to VionexNet Sir!";
+            else title.innerText = "Добро пожаловать в VionexNet Sir!";
+        }
+    </script>
+</body>
+</html>
